@@ -1,0 +1,95 @@
+class MetaType(type):
+    def __new__(cls, name, bases, dct):
+        def create_method(name):
+            def method(self, *args, **kwargs):
+                print(f"Calling {name} with arguments {args} and keyword arguments {kwargs}")
+                result = getattr(self, f"_{name}")(*args, **kwargs)
+                print(f"Result from {name}: {result}")
+                return result
+            return method
+        
+        for key, value in dct.items():
+            if callable(value):
+                dct[key] = create_method(key)
+        
+        return super().__new__(cls, name, bases, dct)
+
+class ComplicatedClass(metaclass=MetaType):
+    def _add(self, x, y):
+        return x + y
+
+    def _subtract(self, x, y):
+        return x - y
+
+    def _multiply(self, x, y):
+        return x * y
+
+    def _divide(self, x, y):
+        return x / y if y != 0 else 'Cannot divide by zero'
+
+def generate_fibonacci(n):
+    memo = {}
+    
+    def fib(k):
+        if k in memo:
+            return memo[k]
+        if k <= 1:
+            return k
+        memo[k] = fib(k-1) + fib(k-2)
+        return memo[k]
+    
+    return fib(n)
+
+def recursive_factorial(n):
+    return 1 if n == 0 else n * recursive_factorial(n-1)
+
+def high_order_function(func):
+    def wrapper(*args, **kwargs):
+        print(f"Wrapper: Calling {func.__name__}")
+        result = func(*args, **kwargs)
+        print(f"Wrapper: {func.__name__} returned {result}")
+        return result
+    return wrapper
+
+@high_order_function
+def power(x, y):
+    return x ** y
+
+def meta_evaluation(data, transform_func):
+    return [transform_func(d) for d in data]
+
+def complex_structure_operations():
+    data = [1, 2, 3, 4, 5]
+    result = meta_evaluation(data, lambda x: x * 2)
+    return result
+
+class ClosureExample:
+    def __init__(self):
+        self.counter = 0
+
+    def incrementer(self):
+        self.counter += 1
+        return self.counter
+
+    def closure(self):
+        def counter_closure():
+            self.counter += 1
+            return self.counter
+        return counter_closure
+
+if __name__ == "__main__":
+    print("Fibonacci of 10:", generate_fibonacci(10))
+    print("Factorial of 5:", recursive_factorial(5))
+    
+    complicated_obj = ComplicatedClass()
+    print(complicated_obj.add(5, 3))
+    print(complicated_obj.subtract(5, 3))
+    
+    closure_instance = ClosureExample()
+    counter_func = closure_instance.closure()
+    print("Closure counter:", counter_func())
+    print("Closure counter:", counter_func())
+    
+    print("Power function with decorator:", power(2, 3))
+    
+    print("Meta-evaluation of complex structure:", complex_structure_operations())
